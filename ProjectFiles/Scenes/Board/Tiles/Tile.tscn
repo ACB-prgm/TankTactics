@@ -1,0 +1,51 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Images/Tiles/Tile_Test_n.png" type="Texture" id=1]
+[ext_resource path="res://Images/Tiles/Tile_Test.png" type="Texture" id=2]
+[ext_resource path="res://Scenes/Board/Tiles/Tile.gd" type="Script" id=3]
+[ext_resource path="res://Fonts/Font.tres" type="DynamicFont" id=4]
+[ext_resource path="res://Scenes/Board/Tiles/Area2D.gd" type="Script" id=5]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 225, 225 )
+
+[node name="Tile" type="Control"]
+margin_right = 150.0
+margin_bottom = 150.0
+rect_min_size = Vector2( 150, 150 )
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Sprite" type="Sprite" parent="."]
+modulate = Color( 0.9, 0.9, 0.9, 1 )
+scale = Vector2( 0.3, 0.3 )
+texture = ExtResource( 2 )
+normal_map = ExtResource( 1 )
+centered = false
+
+[node name="Area2D" type="Area2D" parent="Sprite"]
+visible = false
+position = Vector2( 250, 250 )
+collision_layer = 2
+script = ExtResource( 5 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprite/Area2D"]
+shape = SubResource( 1 )
+
+[node name="Label" type="Label" parent="."]
+modulate = Color( 1, 1, 1, 0.5 )
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -75.0
+margin_top = -75.0
+margin_right = 75.0
+margin_bottom = 75.0
+custom_fonts/font = ExtResource( 4 )
+custom_colors/font_color = Color( 0.756863, 0.752941, 0.756863, 1 )
+text = "A"
+align = 1
+valign = 1

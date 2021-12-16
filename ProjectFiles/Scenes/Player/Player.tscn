@@ -1,0 +1,97 @@
+[gd_scene load_steps=17 format=2]
+
+[ext_resource path="res://Scenes/ship_sidesB.png" type="Texture" id=1]
+[ext_resource path="res://Scenes/Player/Player.gd" type="Script" id=2]
+[ext_resource path="res://Scenes/Player/MuzzleFlash/MuzzleFlash.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scenes/PlayerShipNormal.png" type="Texture" id=5]
+[ext_resource path="res://Scenes/Player/LineTrail.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Scenes/Player/Dissolve.shader" type="Shader" id=10]
+
+[sub_resource type="AtlasTexture" id=1]
+region = Rect2( 0, 0, 350, 350 )
+
+[sub_resource type="AtlasTexture" id=2]
+region = Rect2( 350, 0, 350, 350 )
+
+[sub_resource type="AtlasTexture" id=3]
+region = Rect2( 700, 0, 350, 350 )
+
+[sub_resource type="AtlasTexture" id=4]
+region = Rect2( 1050, 0, 350, 350 )
+
+[sub_resource type="AtlasTexture" id=5]
+region = Rect2( 1400, 0, 350, 350 )
+
+[sub_resource type="AtlasTexture" id=6]
+region = Rect2( 1750, 0, 350, 350 )
+
+[sub_resource type="AtlasTexture" id=7]
+region = Rect2( 2100, 0, 350, 350 )
+
+[sub_resource type="SpriteFrames" id=8]
+animations = [ {
+"frames": [ null, SubResource( 1 ), SubResource( 2 ), SubResource( 3 ), SubResource( 4 ), SubResource( 5 ), SubResource( 6 ), SubResource( 7 ), null ],
+"loop": false,
+"name": "default",
+"speed": 35.0
+} ]
+
+[sub_resource type="ShaderMaterial" id=9]
+shader = ExtResource( 10 )
+shader_param/progress = null
+shader_param/noise_desnity = 60.0
+shader_param/beam_size = 0.15
+shader_param/color = Color( 0, 1.02, 1.2, 1 )
+
+[sub_resource type="CircleShape2D" id=10]
+radius = 55.0
+
+[node name="Player" type="KinematicBody2D"]
+script = ExtResource( 2 )
+
+[node name="Tween" type="Tween" parent="."]
+
+[node name="PortalAnimatedSprite" type="AnimatedSprite" parent="."]
+modulate = Color( 0.65098, 1, 0.988235, 1 )
+self_modulate = Color( 2, 2, 2, 1 )
+frames = SubResource( 8 )
+
+[node name="Sprite" type="Sprite" parent="."]
+material = SubResource( 9 )
+scale = Vector2( 0.5, 0.5 )
+texture = ExtResource( 1 )
+normal_map = ExtResource( 5 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 10 )
+
+[node name="ShootTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true
+
+[node name="BarrelPosition2D" type="Position2D" parent="."]
+show_behind_parent = true
+position = Vector2( 0, -70 )
+
+[node name="MuzzleFlash" parent="BarrelPosition2D" instance=ExtResource( 4 )]
+
+[node name="LineTrails" type="Node2D" parent="."]
+
+[node name="FrontRightTrail" parent="LineTrails" instance=ExtResource( 6 )]
+position = Vector2( 50, -20 )
+MAX_POINTS = 4
+
+[node name="FrontLeftTrail" parent="LineTrails" instance=ExtResource( 6 )]
+position = Vector2( -50, -20 )
+MAX_POINTS = 4
+
+[node name="BackLeftTrail" parent="LineTrails" instance=ExtResource( 6 )]
+position = Vector2( -45, 45 )
+MAX_POINTS = 5
+
+[node name="BackRightTrail" parent="LineTrails" instance=ExtResource( 6 )]
+position = Vector2( 45, 45 )
+MAX_POINTS = 5
+
+[connection signal="tween_all_completed" from="Tween" to="." method="_on_Tween_tween_all_completed"]
+[connection signal="timeout" from="ShootTimer" to="." method="_on_ShootTimer_timeout"]
