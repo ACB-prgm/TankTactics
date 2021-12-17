@@ -32,6 +32,7 @@ script = ExtResource( 1 )
 texture = ExtResource( 3 )
 texture_scale = 0.07
 color = Color( 0.32549, 1, 0.984314, 1 )
+energy = 0.7
 range_height = 50.0
 
 [connection signal="tween_all_completed" from="Line2D/Tween" to="Line2D" method="_on_Tween_tween_all_completed"]

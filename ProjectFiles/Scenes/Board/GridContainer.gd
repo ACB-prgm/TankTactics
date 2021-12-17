@@ -16,6 +16,10 @@ onready var V_Labels = $VBoxContainer
 
 var font = preload("res://Fonts/Font.tres")
 var player_TSCN = preload("res://Scenes/Player_1/Player.tscn")
+var current_player
+var tiles := {}
+var current_moves : Dictionary
+var current_shots : Dictionary
 
 signal tiles_set
 
@@ -27,8 +31,12 @@ func _ready():
 	camera.zoom = tile_container.rect_size / (TILE_SIZE * 6)
 	yield(get_tree().create_timer(0.001), "timeout") # JANKY, REQUIRED FOR TILES TO UPDATE POSITION
 	emit_signal("tiles_set")
+	
+	for child in tile_container.get_children(): # CREATES DICTIONARY OF TILES AND NODES
+		tiles[child.coords] = child
+	
 #	print(tile_container.get_children()[int(rand_range(0, tile_container.get_child_count()-1))].position.global_position)
-	spawn_players([1])
+	spawn_players(["ACB_Gamez", "Subscriber"])
 
 
 func spawn_tiles():
@@ -65,23 +73,60 @@ func spawn_tiles():
 
 
 func spawn_players(players:Array):
+	var available_tiles = tiles.keys()
 	for player in players:
+		available_tiles.shuffle()
+		var spawn_tile = available_tiles[0]
+		available_tiles.erase(spawn_tile)
+		spawn_tile = tiles.get(spawn_tile)
+		
 		var player_ins = player_TSCN.instance()
-		var spawn_tile = tile_container.get_children()[int(rand_range(0, tile_container.get_child_count()-1))]
 		player_ins.global_position = spawn_tile.position
 		player_ins.connect("actions", self, "_on_recieved_player_actions")
 		spawn_tile.occupied = player_ins
 		add_child(player_ins)
 
 
-func _on_recieved_player_actions(moves, shots):
+func _on_recieved_player_actions(player, moves, shots):
+	current_player = player
+	current_moves = moves
+	current_shots = shots
+	
+	for child in optionsContainer.get_children():
+		child.queue_free()
+	
 	for move in moves:
+		tiles.get(move).show_light()
 		var button = Button.new()
+		button.rect_scale *= 2
 		button.text = "/move %s" % move
 		button.connect("pressed", self, "_on_actionButton_pressed", [button])
 		optionsContainer.add_child(button)
-	prints(moves, shots)
+	for shot in shots:
+		tiles.get(shot).show_light(true, "RED")
+		var button = Button.new()
+		button.rect_scale *= 2
+		button.text = "/shoot %s" % shot
+		button.connect("pressed", self, "_on_actionButton_pressed", [button])
+		optionsContainer.add_child(button)
 
 
 func _on_actionButton_pressed(button):
-	print(button.text)
+	var action = button.text.split(" ")
+	for move in current_moves:
+		tiles.get(move).show_light(false)
+	for shot in current_shots:
+		tiles.get(shot).show_light(false)
+	
+	match action[0]:
+		"/move":
+			var new_tile = tiles.get(action[1])
+			var old_tile = tiles.get(current_player.current_tile)
+			
+			current_player.move(new_tile.position)
+			current_player.current_tile = action[1]
+			new_tile.occupied = current_player
+			old_tile.occupied = false
+			
+		"/shoot":
+			pass

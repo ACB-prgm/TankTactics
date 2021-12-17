@@ -3,7 +3,6 @@ extends KinematicBody2D
 
 const MAX_SPEED := 200
 const ACCELERATION := 5
-const KNOCKBACK_FORCE = 100
 
 #onready var barrelPos = $BarrelPosition2D
 #onready var muzzleFlash = $BarrelPosition2D/MuzzleFlash
@@ -15,16 +14,17 @@ onready var trailsNode = $LineTrails
 #onready var portalAnimatedSprite = $PortalAnimatedSprite
 
 #var bullet_TSCN = preload("res://Scenes/Player/Bullet/Bullet.tscn")
+var current_tile : String
 var player_name : String
 var dead := false
-var score_time := 0.0
+var moving := false
 var health = 3
-var input_vector: Vector2
-var velocity: Vector2
-var aim_input_dir: Vector2
-var aim_dir: Vector2
+var look_dir : Vector2
+var aim_dir : Vector2
+var thrust := 0
+var past_val = Vector2.ZERO
 
-signal actions(moves, shots)
+signal actions(player, moves, shots)
 
 
 func _ready():
@@ -33,12 +33,14 @@ func _ready():
 #		portal()
 	Globals.player = self
 	yield(get_tree().create_timer(.1), "timeout")
+	for trail in lineTrails:
+		trail.set_thrust(thrust)
 	get_actions()
 
 
 func _physics_process(_delta):
-	movement()
-	aim()
+	animations()
+#	aim()
 
 
 func reparent_line_trails():
@@ -54,35 +56,65 @@ func get_actions():
 			moves[tile.coords] = tile.position
 		elif tile.occupied and tile.occupied != self:
 			shots[tile.coords] = tile.occupied
+		elif tile.occupied and tile.occupied == self:
+			current_tile = tile.coords
 	
-	emit_signal("actions", moves, shots)
+	emit_signal("actions", self, moves, shots)
 
 # MOVEMENT FUNCTIONS ———————————————————————————————————————————————————————————
-func movement():
-	input_vector.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
-	input_vector.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
-	input_vector = input_vector.normalized()
+func animations():
+#	input_vector.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
+#	input_vector.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
+#	input_vector = input_vector.normalized()
+#
+#	if input_vector:
+#		velocity += input_vector * ACCELERATION
+#		velocity = velocity.clamped(MAX_SPEED)
+#	else:
+#		velocity = velocity.move_toward(Vector2.ZERO, ACCELERATION)
+#
+#	var thrusT = velocity.length()/MAX_SPEED
+#	if !moving:
+#		thrust += .025
+#		for trail in lineTrails:
+#			trail.set_thrust(lerp(0, .9, abs(cos(thrust))))
 	
-	if input_vector:
-		velocity += input_vector * ACCELERATION
-		velocity = velocity.clamped(MAX_SPEED)
-	else:
-		velocity = velocity.move_toward(Vector2.ZERO, ACCELERATION)
-	
-	var thrusT = velocity.length()/MAX_SPEED
-	for trail in lineTrails:
-		trail.set_thrust(thrusT)
+	if look_dir:
+		var aim_rot = look_dir.angle() + deg2rad(90)
+		rotation = _lerp_angle(rotation, aim_rot, 0.075)
 
 # warning-ignore:return_value_discarded
-	move_and_slide(velocity)
+#	move_and_slide(velocity)
+
+
+func move(pos):
+	moving = true
+	look_dir = global_position.direction_to(pos)
+	
+	tween.interpolate_property(self, "global_position", global_position, pos, 
+	1.25, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+	tween.start()
+	
+	yield(tween, "tween_all_completed")
+	movement_rangeArea.rotation = rotation # ENSURES IS AT 90º ANGLE RELATIVE TO BOARD
+	thrust = 1
+	moving = false
+	get_actions()
+
+
+func _on_Tween_tween_step(object, key, elapsed, value):
+	if key == ":global_position":
+		if past_val:
+			thrust = clamp(value.distance_to(past_val)/2, 0, 1)
+			for trail in lineTrails:
+				trail.set_thrust(thrust)
+		past_val = value
 
 
 # SHOOT FUNCTIONS ——————————————————————————————————————————————————————————————
 func shoot():
-	if (Input.is_action_pressed("shoot") or (Globals.shoot_on_aim and aim_input_dir)):
-		
+	if Input.is_action_pressed("shoot"):
 		Globals.camera.shake(100, 0.18, 100, 6.5)
-		velocity += Vector2.RIGHT.rotated(rotation + deg2rad(90)) * KNOCKBACK_FORCE
 #		muzzleFlash.flash()
 		
 #		var bullet_ins = bullet_TSCN.instance()
@@ -92,23 +124,6 @@ func shoot():
 
 
 # AIMING FUNCTIONS —————————————————————————————————————————————————————————————
-func aim():
-	aim_input_dir.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
-	aim_input_dir.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
-	aim_input_dir = aim_input_dir.normalized()
-	
-	if aim_input_dir:
-		aim_dir = aim_input_dir
-	elif input_vector:
-		aim_dir = input_vector
-	else:
-		aim_dir = Vector2.UP
-	
-#	aim_dir = global_position.direction_to(get_global_mouse_position())
-	var aim_rot = aim_dir.angle() + deg2rad(90) # adjust for sprite rot
-
-	rotation = _lerp_angle(rotation, aim_rot, 0.075) 
-
 func _lerp_angle(from, to, weight):
 	return from + short_angle_dist(from, to) * weight
 
@@ -159,7 +174,6 @@ func short_angle_dist(from, to):
 
 
 func take_damage():
-	velocity = Vector2.ZERO
 	Globals.camera.shake(1000, 0.3, 1000, 8)
 	health -= 1
 	
@@ -172,4 +186,3 @@ func die():
 #		portal(false)
 #		Transitioner.change_title_page("SCORE")
 #		Music._out()
-
