@@ -123,6 +123,8 @@ func _on_recieved_player_actions(player, moves, shots):
 
 func _on_actionButton_pressed(button):
 	var action = button.text.split(" ")
+	
+	#turn off light animations
 	for move in current_moves:
 		tiles.get(move).show_light(false)
 	for shot in current_shots:
@@ -139,4 +141,4 @@ func _on_actionButton_pressed(button):
 			old_tile.occupied = false
 			
 		"/shoot":
-			current_player.shoot()
+			current_player.shoot(tiles.get(action[1]).position)

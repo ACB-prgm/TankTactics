@@ -4,7 +4,7 @@ extends KinematicBody2D
 const MAX_SPEED := 200
 const ACCELERATION := 5
 
-#onready var barrelPos = $BarrelPosition2D
+onready var barrelPos = $BarrellPosition2D
 #onready var muzzleFlash = $BarrelPosition2D/MuzzleFlash
 onready var movement_rangeArea = $MovementArea2D
 onready var tween = $Tween
@@ -13,7 +13,7 @@ onready var shader = $Sprite.get_material()
 onready var trailsNode = $LineTrails
 #onready var portalAnimatedSprite = $PortalAnimatedSprite
 
-#var bullet_TSCN = preload("res://Scenes/Player/Bullet/Bullet.tscn")
+var bullet_TSCN = preload("res://Scenes/Bullet/Bullet.tscn")
 var current_tile : String
 var player_name : String
 var action_points := 0
@@ -97,14 +97,19 @@ func _on_Tween_tween_step(_object, key, _elapsed, value):
 
 
 # SHOOT FUNCTIONS ——————————————————————————————————————————————————————————————
-func shoot():
+func shoot(target:Vector2):
+	var aim_rot = global_position.direction_to(target).angle() + deg2rad(90)
+	tween.interpolate_property(self, "rotation", rotation, aim_rot, 
+	.3, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+	tween.start()
+	
+	yield(tween, "tween_all_completed")
+	
 	Globals.camera.shake(100, 0.4, 100)
-#		muzzleFlash.flash()
-		
-#		var bullet_ins = bullet_TSCN.instance()
-#		bullet_ins.rotation = rotation - deg2rad(90)
-#		bullet_ins.global_position = barrelPos.global_position
-#		get_parent().call_deferred("add_child", bullet_ins)
+	var bullet_ins = bullet_TSCN.instance()
+	bullet_ins.target = target
+	bullet_ins.global_position = barrelPos.global_position
+	get_parent().call_deferred("add_child", bullet_ins)
 
 
 # AIMING FUNCTIONS —————————————————————————————————————————————————————————————

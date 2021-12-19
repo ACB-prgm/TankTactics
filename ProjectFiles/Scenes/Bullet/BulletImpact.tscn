@@ -1,49 +1,49 @@
 [gd_scene load_steps=19 format=2]
 
-[ext_resource path="res://Images/Player/ShockwaveAnim.png" type="Texture" id=1]
-[ext_resource path="res://Images/Lights/LightDifuse.png" type="Texture" id=2]
-[ext_resource path="res://Particles2D+.gd" type="Script" id=3]
-[ext_resource path="res://addons/kenney_particle_pack/muzzle_06.png" type="Texture" id=4]
-[ext_resource path="res://Scenes/Player/Bullet/BulletImpact.gd" type="Script" id=5]
-[ext_resource path="res://addons/kenney_particle_pack/smoke_04.png" type="Texture" id=6]
-[ext_resource path="res://addons/kenney_particle_pack/star_05.png" type="Texture" id=7]
-[ext_resource path="res://Scenes/Autoloads/ParticlesCache/Materials/FlashBulletImpact.tres" type="Material" id=8]
-[ext_resource path="res://Scenes/Autoloads/ParticlesCache/Materials/SmokeBulletImpact.tres" type="Material" id=9]
-[ext_resource path="res://Scenes/Autoloads/ParticlesCache/Materials/LinesBulletImpact.tres" type="Material" id=10]
+[ext_resource path="res://Images/Lights/LightDifuse.png" type="Texture" id=1]
+[ext_resource path="res://Scenes/Bullet/BulletImpact.gd" type="Script" id=2]
+[ext_resource path="res://Scenes/Autoloads/ParticlesCache/Materials/FlashBulletImpact.tres" type="Material" id=3]
+[ext_resource path="res://addons/kenney_particle_pack/smoke_04.png" type="Texture" id=4]
+[ext_resource path="res://Particles2D+.gd" type="Script" id=5]
+[ext_resource path="res://addons/kenney_particle_pack/muzzle_06.png" type="Texture" id=6]
+[ext_resource path="res://Scenes/Autoloads/ParticlesCache/Materials/SmokeBulletImpact.tres" type="Material" id=7]
+[ext_resource path="res://Scenes/Autoloads/ParticlesCache/Materials/LinesBulletImpact.tres" type="Material" id=8]
+[ext_resource path="res://Images/Player/ShockwaveAnim.png" type="Texture" id=9]
+[ext_resource path="res://addons/kenney_particle_pack/star_05.png" type="Texture" id=10]
 
 [sub_resource type="AtlasTexture" id=1]
 flags = 4
-atlas = ExtResource( 1 )
+atlas = ExtResource( 9 )
 region = Rect2( 0, 0, 350, 350 )
 
 [sub_resource type="AtlasTexture" id=2]
 flags = 4
-atlas = ExtResource( 1 )
+atlas = ExtResource( 9 )
 region = Rect2( 350, 0, 350, 350 )
 
 [sub_resource type="AtlasTexture" id=3]
 flags = 4
-atlas = ExtResource( 1 )
+atlas = ExtResource( 9 )
 region = Rect2( 700, 0, 350, 350 )
 
 [sub_resource type="AtlasTexture" id=4]
 flags = 4
-atlas = ExtResource( 1 )
+atlas = ExtResource( 9 )
 region = Rect2( 1050, 0, 350, 350 )
 
 [sub_resource type="AtlasTexture" id=5]
 flags = 4
-atlas = ExtResource( 1 )
+atlas = ExtResource( 9 )
 region = Rect2( 1400, 0, 350, 350 )
 
 [sub_resource type="AtlasTexture" id=6]
 flags = 4
-atlas = ExtResource( 1 )
+atlas = ExtResource( 9 )
 region = Rect2( 1750, 0, 350, 350 )
 
 [sub_resource type="AtlasTexture" id=7]
 flags = 4
-atlas = ExtResource( 1 )
+atlas = ExtResource( 9 )
 region = Rect2( 2100, 0, 350, 350 )
 
 [sub_resource type="SpriteFrames" id=8]
@@ -57,10 +57,11 @@ animations = [ {
 [node name="Impact" type="Node2D"]
 modulate = Color( 1.1, 1.1, 1.15, 1 )
 scale = Vector2( 1.2, 1.2 )
-script = ExtResource( 5 )
+z_index = 2
+script = ExtResource( 2 )
 
 [node name="Light2D" type="Light2D" parent="."]
-texture = ExtResource( 2 )
+texture = ExtResource( 1 )
 texture_scale = 0.2
 color = Color( 0.580392, 0.976471, 1, 1 )
 
@@ -80,9 +81,9 @@ position = Vector2( 0, -8 )
 amount = 20
 lifetime = 0.55
 explosiveness = 0.85
-process_material = ExtResource( 9 )
-texture = ExtResource( 6 )
-script = ExtResource( 3 )
+process_material = ExtResource( 7 )
+texture = ExtResource( 4 )
+script = ExtResource( 5 )
 one_shot_start = true
 
 [node name="LinesParticles" type="Particles2D" parent="."]
@@ -90,9 +91,9 @@ scale = Vector2( 0.5, 0.5 )
 amount = 20
 lifetime = 0.5
 explosiveness = 1.0
-process_material = ExtResource( 10 )
-texture = ExtResource( 4 )
-script = ExtResource( 3 )
+process_material = ExtResource( 8 )
+texture = ExtResource( 6 )
+script = ExtResource( 5 )
 one_shot_start = true
 
 [node name="FlashParticles" type="Particles2D" parent="."]
@@ -100,9 +101,9 @@ position = Vector2( 0, -12.3736 )
 amount = 4
 lifetime = 0.5
 explosiveness = 1.0
-process_material = ExtResource( 8 )
-texture = ExtResource( 7 )
-script = ExtResource( 3 )
+process_material = ExtResource( 3 )
+texture = ExtResource( 10 )
+script = ExtResource( 5 )
 one_shot_start = true
 
 [connection signal="particles_cycle_finished" from="SmokeParticles" to="." method="_on_Particles2D_Plus_particles_cycle_finished"]

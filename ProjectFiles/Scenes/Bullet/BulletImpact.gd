@@ -20,5 +20,4 @@ func _ready():
 
 
 func _on_Particles2D_Plus_particles_cycle_finished():
-	print("hi")
 	queue_free()

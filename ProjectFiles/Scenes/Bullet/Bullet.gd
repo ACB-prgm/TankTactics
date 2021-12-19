@@ -7,7 +7,7 @@ const TRANS = Tween.TRANS_QUAD
 onready var tween = $Tween
 onready var sprite = $Sprite
 
-var impact_TSCN = preload("res://Scenes/Player/Bullet/BulletImpact.tscn")
+var impact_TSCN = preload("res://Scenes/Bullet/BulletImpact.tscn")
 var target : Vector2 = Vector2(450, 100)
 
 
@@ -16,9 +16,9 @@ func _ready():
 
 
 func shoot():
-	global_position = Vector2(100, 100)
-	visible = false
-	visible = true
+	look_at(target)
+	target = target - Vector2(25, 0).rotated(rotation)
+
 	tween.interpolate_property(self, "global_position", global_position, target, 
 	dur, TRANS, Tween.EASE_IN_OUT)
 	tween.interpolate_property(self, "scale", scale, scale*1.25, 
@@ -34,12 +34,11 @@ func shoot():
 	tween.interpolate_property(sprite, "position", Vector2.ZERO, Vector2(15, 0), 
 	dur/2.0, TRANS,Tween.EASE_IN, dur/2.0)
 	tween.start()
-	
-	yield(tween, "tween_all_completed")
-	visible = false
 
 
 func _on_Tween_tween_all_completed():
 	var impact = impact_TSCN.instance()
 	impact.global_position = global_position + Vector2(30,10).rotated(rotation)
 	get_parent().add_child(impact)
+	
+	queue_free()

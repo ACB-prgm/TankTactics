@@ -13,6 +13,7 @@ load_path = "res://.import/smoke_07.png-83e8d317e539377942ddc86d76ac5df1.stex"
 
 [node name="Node2D" type="Node2D"]
 modulate = Color( 1.1, 1.1, 1.15, 1 )
+z_index = 2
 script = ExtResource( 2 )
 
 [node name="Light2D" type="Light2D" parent="."]
