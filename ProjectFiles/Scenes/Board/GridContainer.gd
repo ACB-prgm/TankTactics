@@ -16,6 +16,10 @@ onready var V_Labels = $VBoxContainer
 
 var font = preload("res://Fonts/Font.tres")
 var player_TSCN = preload("res://Scenes/Player_1/Player.tscn")
+var players := {
+	"ACB_Gamez" : null,
+	"Subscriber" : null
+}
 var current_player
 var tiles := {}
 var current_moves : Dictionary
@@ -28,15 +32,19 @@ func _ready():
 	randomize()
 	spawn_tiles()
 	camera.global_position = rect_size / 2
-	camera.zoom = tile_container.rect_size / (TILE_SIZE * 6)
+	camera.relative_zoom = tile_container.rect_size / (TILE_SIZE * 6)
+	camera.zoom = camera.relative_zoom
 	yield(get_tree().create_timer(0.001), "timeout") # JANKY, REQUIRED FOR TILES TO UPDATE POSITION
+	start_game()
+
+
+func start_game():
 	emit_signal("tiles_set")
 	
 	for child in tile_container.get_children(): # CREATES DICTIONARY OF TILES AND NODES
 		tiles[child.coords] = child
 	
-#	print(tile_container.get_children()[int(rand_range(0, tile_container.get_child_count()-1))].position.global_position)
-	spawn_players(["ACB_Gamez", "Subscriber"])
+	spawn_players()
 
 
 func spawn_tiles():
@@ -72,7 +80,7 @@ func spawn_tiles():
 	H_Labels.rect_position = tile_container.rect_position + Vector2(TILE_SIZE.x/2 - 25 * .3, H_Labels.rect_size.y + tile_container.rect_size.y)
 
 
-func spawn_players(players:Array):
+func spawn_players():
 	var available_tiles = tiles.keys()
 	for player in players:
 		available_tiles.shuffle()
@@ -81,7 +89,9 @@ func spawn_players(players:Array):
 		spawn_tile = tiles.get(spawn_tile)
 		
 		var player_ins = player_TSCN.instance()
+		players[player] = player_ins
 		player_ins.global_position = spawn_tile.position
+		player_ins.player_name = player
 		player_ins.connect("actions", self, "_on_recieved_player_actions")
 		spawn_tile.occupied = player_ins
 		add_child(player_ins)
@@ -129,4 +139,4 @@ func _on_actionButton_pressed(button):
 			old_tile.occupied = false
 			
 		"/shoot":
-			pass
+			current_player.shoot()

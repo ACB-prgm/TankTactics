@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Images/LightingTest2.png" type="Texture" id=1]
-[ext_resource path="res://Images/Bullet.png" type="Texture" id=2]
+[ext_resource path="res://Images/Player/Bullet.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/Player/Bullet/Bullet.gd" type="Script" id=3]
 [ext_resource path="res://Scenes/Player/Bullet/BulletTrailLine2D.gd" type="Script" id=4]
 [ext_resource path="res://Scenes/Autoloads/Materials/PlayerBullet.tres" type="Material" id=5]
