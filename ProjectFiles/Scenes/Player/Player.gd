@@ -16,6 +16,7 @@ onready var trailsNode = $LineTrails
 #var bullet_TSCN = preload("res://Scenes/Player/Bullet/Bullet.tscn")
 var current_tile : String
 var player_name : String
+var action_points := 0
 var dead := false
 var moving := false
 var health = 3
@@ -63,28 +64,10 @@ func get_actions():
 
 # MOVEMENT FUNCTIONS ———————————————————————————————————————————————————————————
 func animations():
-#	input_vector.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
-#	input_vector.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
-#	input_vector = input_vector.normalized()
-#
-#	if input_vector:
-#		velocity += input_vector * ACCELERATION
-#		velocity = velocity.clamped(MAX_SPEED)
-#	else:
-#		velocity = velocity.move_toward(Vector2.ZERO, ACCELERATION)
-#
-#	var thrusT = velocity.length()/MAX_SPEED
-#	if !moving:
-#		thrust += .025
-#		for trail in lineTrails:
-#			trail.set_thrust(lerp(0, .9, abs(cos(thrust))))
 	
 	if look_dir:
 		var aim_rot = look_dir.angle() + deg2rad(90)
 		rotation = _lerp_angle(rotation, aim_rot, 0.075)
-
-# warning-ignore:return_value_discarded
-#	move_and_slide(velocity)
 
 
 func move(pos):
@@ -102,8 +85,10 @@ func move(pos):
 	get_actions()
 
 
-func _on_Tween_tween_step(object, key, elapsed, value):
+func _on_Tween_tween_step(_object, key, _elapsed, value):
 	if key == ":global_position":
+		movement_rangeArea.rotation = rotation
+		
 		if past_val:
 			thrust = clamp(value.distance_to(past_val)/2, 0, 1)
 			for trail in lineTrails:
@@ -113,8 +98,7 @@ func _on_Tween_tween_step(object, key, elapsed, value):
 
 # SHOOT FUNCTIONS ——————————————————————————————————————————————————————————————
 func shoot():
-	if Input.is_action_pressed("shoot"):
-		Globals.camera.shake(100, 0.18, 100, 6.5)
+	Globals.camera.shake(100, 0.4, 100)
 #		muzzleFlash.flash()
 		
 #		var bullet_ins = bullet_TSCN.instance()
