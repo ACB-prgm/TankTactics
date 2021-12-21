@@ -1,7 +1,7 @@
 extends KinematicBody2D
 
 
-const MAX_SPEED := 200
+const MOVE_TIME := 1.25
 const ACCELERATION := 5
 
 onready var barrelPos = $BarrellPosition2D
@@ -22,8 +22,6 @@ var action_points := 0
 var dead := false
 var moving := false
 var health = 3
-var look_dir : Vector2
-var aim_dir : Vector2
 var thrust := 0.0
 var past_val = Vector2.ZERO
 
@@ -75,9 +73,14 @@ func move(tile):
 	
 	moving = true
 	var pos = tile.position
-	look_dir = global_position.direction_to(pos)
+	var aim_rot = global_position.direction_to(pos).angle() + deg2rad(90)
+	aim_rot = short_angle_dist(rotation, aim_rot) + rotation
+	
+	tween.interpolate_property(self, "rotation", rotation, aim_rot, 
+	MOVE_TIME * 0.9, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+	
 	tween.interpolate_property(self, "global_position", global_position, pos, 
-	1.25, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+	MOVE_TIME, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
 	tween.start()
 	
 	yield(tween, "tween_all_completed")
@@ -92,10 +95,6 @@ func _on_Tween_tween_step(_object, key, _elapsed, value):
 	
 	if key == ":global_position":
 		movement_rangeArea.rotation = rotation
-		
-		if look_dir:
-			var aim_rot = look_dir.angle() + deg2rad(90)
-			rotation = _lerp_angle(rotation, aim_rot, 0.075)
 			
 		if past_val:
 			thrust = clamp(value.distance_to(past_val)/2.0, 0.0, 1.0)
@@ -107,10 +106,12 @@ func _on_Tween_tween_step(_object, key, _elapsed, value):
 # SHOOT FUNCTIONS ——————————————————————————————————————————————————————————————
 func shoot(tile):
 	var aim_rot = global_position.direction_to(tile.position).angle() + deg2rad(90)
+	var rot_time = clamp(abs(rad2deg(short_angle_dist(rotation, aim_rot))/100.0), 0.0, 2.0)
+	
 	aim_rot = short_angle_dist(rotation, aim_rot) + rotation
 	
 	tween.interpolate_property(self, "rotation", rotation, aim_rot, 
-	.5, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+	rot_time, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
 	tween.start()
 	
 	yield(tween, "tween_all_completed")
