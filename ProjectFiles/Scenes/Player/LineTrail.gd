@@ -9,8 +9,8 @@ var MAX_POINTS := 10
 var frame := 0
 
 
-#func _ready():
-	
+func _ready():
+	set_physics_process(false)
 
 
 func _physics_process(_delta):
@@ -38,6 +38,9 @@ func draw_trail():
 	add_point(to_local(parent.global_position), 0)
 	
 	if get_point_count() > MAX_POINTS:
+		if points[MAX_POINTS] - points[0] == Vector2(0,0):
+			set_physics_process(false)
+		
 		remove_point(MAX_POINTS)
 
 

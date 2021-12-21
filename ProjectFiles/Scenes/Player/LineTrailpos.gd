@@ -21,6 +21,7 @@ func _ready():
 
 func set_thrust(thrust):
 	light.energy = lerp(0.5, 0.7, thrust)
+	line.set_physics_process(true)
 
 
 func reparent(parent):
