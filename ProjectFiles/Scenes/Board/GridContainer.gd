@@ -122,8 +122,6 @@ func create_board():
 	camera.zoom = camera.relative_zoom
 	
 	$LightControl/Light2D.texture_scale = tile_container.rect_size.x / 1080.0
-	
-	print($LightControl/Light2D.texture_scale)
 
 
 func spawn_players():

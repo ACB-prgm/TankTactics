@@ -28,6 +28,7 @@ config/icon="res://icon.png"
 
 Globals="*res://Scenes/Autoloads/Globals.gd"
 ParticlesCache="*res://Scenes/Autoloads/ParticlesCache/ParticlesCache.gd"
+GlowWorldEnvironment="*res://Scenes/Autoloads/GlowWorldEnvironment.tscn"
 
 [display]
 

@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Scenes/Board/GridContainer.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Autoloads/Camera/Camera.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Scenes/Autoloads/GlowWorldEnvironment.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Images/Lights/LightDifuse.png" type="Texture" id=4]
 
 [node name="Control" type="Control"]
@@ -74,8 +73,6 @@ color = Color( 0, 0, 0, 0.1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="WorldEnvironment" parent="." instance=ExtResource( 3 )]
 
 [node name="LightControl" type="Control" parent="."]
 anchor_left = 0.5
