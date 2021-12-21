@@ -15,6 +15,8 @@ func _ready():
 	1, Tween.TRANS_BOUNCE, Tween.EASE_IN_OUT)
 	tween.start()
 	
+	Globals.camera.shake(100, 0.5, 100)
+	
 	$AnimatedSprite.set_frame(0)
 	$AnimatedSprite.play()
 

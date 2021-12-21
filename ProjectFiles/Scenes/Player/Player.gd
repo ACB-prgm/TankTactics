@@ -27,7 +27,6 @@ var past_val = Vector2.ZERO
 
 signal actions(player, moves, shots)
 
-
 func _ready():
 	reparent_line_trails()
 #	if Globals._2DWorld:
@@ -37,11 +36,6 @@ func _ready():
 	for trail in lineTrails:
 		trail.set_thrust(thrust)
 	get_actions()
-
-
-func _physics_process(_delta):
-	animations()
-#	aim()
 
 
 func reparent_line_trails():
@@ -65,9 +59,7 @@ func get_actions():
 # MOVEMENT FUNCTIONS ———————————————————————————————————————————————————————————
 func animations():
 	
-	if look_dir:
-		var aim_rot = look_dir.angle() + deg2rad(90)
-		rotation = _lerp_angle(rotation, aim_rot, 0.075)
+	pass
 
 
 func move(pos):
@@ -86,9 +78,14 @@ func move(pos):
 
 
 func _on_Tween_tween_step(_object, key, _elapsed, value):
+	
 	if key == ":global_position":
 		movement_rangeArea.rotation = rotation
 		
+		if look_dir:
+			var aim_rot = look_dir.angle() + deg2rad(90)
+			rotation = _lerp_angle(rotation, aim_rot, 0.075)
+			
 		if past_val:
 			thrust = clamp(value.distance_to(past_val)/2, 0, 1)
 			for trail in lineTrails:
@@ -99,18 +96,20 @@ func _on_Tween_tween_step(_object, key, _elapsed, value):
 # SHOOT FUNCTIONS ——————————————————————————————————————————————————————————————
 func shoot(target:Vector2):
 	var aim_rot = global_position.direction_to(target).angle() + deg2rad(90)
+	aim_rot = short_angle_dist(rotation, aim_rot) + rotation
+	
 	tween.interpolate_property(self, "rotation", rotation, aim_rot, 
-	.3, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+	.5, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
 	tween.start()
 	
 	yield(tween, "tween_all_completed")
+	yield(get_tree().create_timer(0.15), "timeout")
 	
-	Globals.camera.shake(100, 0.4, 100)
 	var bullet_ins = bullet_TSCN.instance()
 	bullet_ins.target = target
 	bullet_ins.global_position = barrelPos.global_position
-	get_parent().call_deferred("add_child", bullet_ins)
-
+	get_parent().add_child(bullet_ins)
+#	get_parent().call_deferred("add_child", bullet_ins)
 
 # AIMING FUNCTIONS —————————————————————————————————————————————————————————————
 func _lerp_angle(from, to, weight):

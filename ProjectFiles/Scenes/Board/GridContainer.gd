@@ -30,6 +30,7 @@ signal tiles_set
 
 func _ready():
 	randomize()
+	
 	spawn_tiles()
 	camera.global_position = rect_size / 2
 	camera.relative_zoom = tile_container.rect_size / (TILE_SIZE * 6)

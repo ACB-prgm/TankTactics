@@ -34,6 +34,8 @@ func shoot():
 	tween.interpolate_property(sprite, "position", Vector2.ZERO, Vector2(15, 0), 
 	dur/2.0, TRANS,Tween.EASE_IN, dur/2.0)
 	tween.start()
+	
+	Globals.camera.shake(100, 0.3, 100)
 
 
 func _on_Tween_tween_all_completed():
