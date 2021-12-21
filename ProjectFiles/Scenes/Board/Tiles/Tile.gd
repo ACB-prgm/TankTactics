@@ -2,9 +2,9 @@ extends Control
 
 const COLORS = {
 	"RED" : Color(1,0,0,1),
-	"BLUE" : Color(0,.71,1,1)
+	"BLUE" : Color(0,.72,1,1)
 }
-const LIGHT_MAX := 1.1
+const LIGHT_MAX := 1.3
 
 
 onready var sprite = $Sprite
@@ -12,6 +12,7 @@ onready var label = $Label
 onready var light = $Sprite/Light2D
 onready var tween = $Tween
 onready var animationPlayer = $AnimationPlayer
+onready var anim_time = Globals.TILE_ANIM_TIME
 
 var coords = "A0" setget set_coords
 var occupied = false
@@ -42,17 +43,17 @@ func show_light(show=true, color="BLUE"):
 		light.color = COLORS.get(color)
 		
 		tween.interpolate_property(light, "energy", light.energy, LIGHT_MAX, 
-		1.3, Tween.TRANS_SINE, Tween.EASE_IN)
+		anim_time * 0.4, Tween.TRANS_SINE, Tween.EASE_IN)
 		tween.start()
 	else:
 		tween.interpolate_property(light, "energy", light.energy, 0, 
-		1.2, Tween.TRANS_SINE, Tween.EASE_OUT)
+		anim_time * 0.4, Tween.TRANS_SINE, Tween.EASE_OUT)
 		tween.start()
 
 
-func _on_Tween_tween_completed(object, key):
+func _on_Tween_tween_completed(_object, _key):
 	if fin_light:
 		fin_light = false
 		tween.interpolate_property(light, "energy", light.energy, 0, 
-		1.3, Tween.TRANS_SINE, Tween.EASE_OUT, .2)
+		anim_time * 0.4, Tween.TRANS_SINE, Tween.EASE_OUT, anim_time * 0.2)
 		tween.start()

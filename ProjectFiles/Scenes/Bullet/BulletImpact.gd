@@ -11,8 +11,8 @@ onready var flash_particles = $FlashParticles
 
 func _ready():
 	
-	tween.interpolate_property(light, "energy", null, 0.2, 
-	1, Tween.TRANS_BOUNCE, Tween.EASE_IN_OUT)
+	tween.interpolate_property(light, "energy", 2.5, .45, 
+	0.55 , Tween.TRANS_BOUNCE, Tween.EASE_IN_OUT)
 	tween.start()
 	
 	Globals.camera.shake(100, 0.5, 100)

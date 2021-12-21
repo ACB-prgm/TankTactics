@@ -1,6 +1,8 @@
 extends Node
 
 
+const TILE_ANIM_TIME := 3.5
+
 var player
 var camera
 var _2DWorld

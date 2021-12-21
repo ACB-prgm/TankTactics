@@ -31,6 +31,7 @@ var current_shots : Dictionary
 var player_moving := false
 
 signal tiles_set
+signal players_spawned
 
 
 func _ready():
@@ -45,14 +46,32 @@ func _ready():
 
 
 func show_move_lights():
-	for player in players:
+	var sorted_players = get_sorted_players()
+	
+	for player in sorted_players:
 		if !player_moving:
 			players.get(player).show_move_lights()
-			yield(get_tree().create_timer(1.5), "timeout")
+			yield(get_tree().create_timer(Globals.TILE_ANIM_TIME), "timeout")
 		else:
 			break
 		
 	show_move_lights()
+
+
+func get_sorted_players() -> Array:
+	var _players := {}
+	var dists := []
+	for player in players:
+		var dist = rect_global_position.distance_squared_to(players.get(player).global_position)
+		_players[dist] = player
+		dists.append(dist)
+	
+	dists.sort()
+	var sorted_players := []
+	for dist in dists:
+		sorted_players.append(_players.get(dist))
+	
+	return sorted_players
 
 
 func start_game():
@@ -63,6 +82,8 @@ func start_game():
 		tiles[tile.coords] = tile
 	
 	spawn_players()
+	
+	yield(get_tree().create_timer(0.001), "timeout")
 	show_move_lights()
 
 
@@ -119,6 +140,8 @@ func spawn_players():
 		player_ins.connect("actions", self, "_on_recieved_player_actions")
 		spawn_tile.occupied = player_ins
 		add_child(player_ins)
+	
+	emit_signal("players_spawned")
 
 
 func _on_recieved_player_actions(player, moves, shots):

@@ -20,7 +20,7 @@ func _ready():
 
 
 func set_thrust(thrust):
-	light.energy = lerp(0.55, 0.7, thrust)
+	light.energy = lerp(0.5, 0.7, thrust)
 
 
 func reparent(parent):

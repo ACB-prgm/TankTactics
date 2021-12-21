@@ -62,7 +62,7 @@ script = ExtResource( 2 )
 
 [node name="Light2D" type="Light2D" parent="."]
 texture = ExtResource( 1 )
-texture_scale = 0.2
+texture_scale = 0.3
 color = Color( 0.580392, 0.976471, 1, 1 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
@@ -77,7 +77,7 @@ playing = true
 [node name="VisibilityNotifier2D" type="VisibilityNotifier2D" parent="."]
 
 [node name="SmokeParticles" type="Particles2D" parent="."]
-position = Vector2( 0, -8 )
+position = Vector2( 0, 1.672 )
 amount = 20
 lifetime = 0.55
 explosiveness = 0.85
@@ -97,7 +97,7 @@ script = ExtResource( 5 )
 one_shot_start = true
 
 [node name="FlashParticles" type="Particles2D" parent="."]
-position = Vector2( 0, -12.3736 )
+position = Vector2( 0, -3.61694 )
 amount = 4
 lifetime = 0.5
 explosiveness = 1.0

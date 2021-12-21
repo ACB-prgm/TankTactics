@@ -24,7 +24,7 @@ var moving := false
 var health = 3
 var look_dir : Vector2
 var aim_dir : Vector2
-var thrust := 0
+var thrust := 0.0
 var past_val = Vector2.ZERO
 
 signal actions(player, moves, shots)
@@ -98,7 +98,7 @@ func _on_Tween_tween_step(_object, key, _elapsed, value):
 			rotation = _lerp_angle(rotation, aim_rot, 0.075)
 			
 		if past_val:
-			thrust = clamp(value.distance_to(past_val)/2, 0, 1)
+			thrust = clamp(value.distance_to(past_val)/2.0, 0.0, 1.0)
 			for trail in lineTrails:
 				trail.set_thrust(thrust)
 		past_val = value
