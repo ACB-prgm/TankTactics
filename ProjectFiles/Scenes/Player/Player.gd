@@ -16,7 +16,7 @@ onready var trailsNode = $LineTrails
 var bullet_TSCN = preload("res://Scenes/Bullet/Bullet.tscn")
 var current_moves := {}
 var current_shots := {}
-var current_tile : String
+var current_tile 
 var player_name : String
 var action_points := 0
 var dead := false
@@ -39,18 +39,15 @@ func _ready():
 	get_actions()
 
 
-<<<<<<< Updated upstream
-=======
-func _physics_process(_delta):
-	animations()
-
-
->>>>>>> Stashed changes
 func reparent_line_trails():
 	for trail in lineTrails:
 		trail.reparent(get_parent())
 
+
 func get_actions():
+	current_moves.clear()
+	current_shots.clear()
+	
 	for tile in movement_rangeArea.get_overlapping_areas():
 		tile = tile.tile
 		if !tile.occupied and global_position.distance_to(tile.position) < 213:
@@ -60,24 +57,25 @@ func get_actions():
 		elif tile.occupied and tile.occupied == self:
 			current_tile = tile
 	
-	
 	emit_signal("actions", self, current_moves, current_shots)
 
 
 func show_move_lights():
-	pass
+	for move in current_moves:
+		current_moves.get(move).show_light()
+	for shot in current_shots:
+		current_shots.get(shot).show_light(true, "RED")
 
 
-# MOVEMENT FUNCTIONS ———————————————————————————————————————————————————————————
-func animations():
+
+func move(tile):
+	current_tile.occupied = false
+	tile.occupied = self
+	current_tile = tile
 	
-	pass
-
-
-func move(pos):
 	moving = true
+	var pos = tile.position
 	look_dir = global_position.direction_to(pos)
-	
 	tween.interpolate_property(self, "global_position", global_position, pos, 
 	1.25, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
 	tween.start()
@@ -86,6 +84,8 @@ func move(pos):
 	movement_rangeArea.rotation = rotation # ENSURES IS AT 90º ANGLE RELATIVE TO BOARD
 	thrust = 1
 	moving = false
+	
+	get_actions()
 
 
 func _on_Tween_tween_step(_object, key, _elapsed, value):
@@ -105,8 +105,8 @@ func _on_Tween_tween_step(_object, key, _elapsed, value):
 
 
 # SHOOT FUNCTIONS ——————————————————————————————————————————————————————————————
-func shoot(target:Vector2):
-	var aim_rot = global_position.direction_to(target).angle() + deg2rad(90)
+func shoot(tile):
+	var aim_rot = global_position.direction_to(tile.position).angle() + deg2rad(90)
 	aim_rot = short_angle_dist(rotation, aim_rot) + rotation
 	
 	tween.interpolate_property(self, "rotation", rotation, aim_rot, 
@@ -117,7 +117,7 @@ func shoot(target:Vector2):
 	yield(get_tree().create_timer(0.15), "timeout")
 	
 	var bullet_ins = bullet_TSCN.instance()
-	bullet_ins.target = target
+	bullet_ins.target = tile.position
 	bullet_ins.global_position = barrelPos.global_position
 	get_parent().add_child(bullet_ins)
 #	get_parent().call_deferred("add_child", bullet_ins)

@@ -23,7 +23,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0, 0.5, 0.7, 1.2 ),
 "transitions": PoolRealArray( 1, 1, 1, 1 ),
 "update": 0,
-"values": [ 0.0, 1.0, 1.0, 0.4 ]
+"values": [ 0.0, 1.1, 1.1, 0.4 ]
 }
 
 [node name="Tile" type="Control"]
@@ -55,8 +55,8 @@ shape = SubResource( 1 )
 position = Vector2( 250, 250 )
 texture = ExtResource( 6 )
 texture_scale = 0.5
-color = Color( 0, 0.72, 1, 1 )
-energy = 0.0
+color = Color( 0, 0.721569, 1, 1 )
+energy = 0.4
 
 [node name="Label" type="Label" parent="."]
 modulate = Color( 1, 1, 1, 0.5 )
@@ -82,3 +82,5 @@ playback_speed = 0.5
 anims/light = SubResource( 2 )
 
 [node name="Tween" type="Tween" parent="."]
+
+[connection signal="tween_completed" from="Tween" to="." method="_on_Tween_tween_completed"]

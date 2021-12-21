@@ -17,11 +17,12 @@ func _ready():
 	
 	light.texture_scale = lerp(0.07, 0.5, 0.1/line_thickness)
 	light.color = light_color
-	
 
 
 func set_thrust(thrust):
-	light.energy = lerp(0.6, 0.7, thrust)
+	light.energy = lerp(0.55, 0.7, thrust)
+
 
 func reparent(parent):
 	line.reparent(parent)
+

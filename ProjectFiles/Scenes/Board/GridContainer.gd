@@ -24,27 +24,35 @@ var players := {
 	"Subscriber4" : null,
 	"Subscriber5" : null,
 }
-var current_player
 var tiles := {}
+var current_player
 var current_moves : Dictionary
 var current_shots : Dictionary
+var player_moving := false
 
 signal tiles_set
 
 
 func _ready():
 	randomize()
-<<<<<<< Updated upstream
 	
-	spawn_tiles()
+	create_board()
 	camera.global_position = rect_size / 2
 	camera.relative_zoom = tile_container.rect_size / (TILE_SIZE * 6)
 	camera.zoom = camera.relative_zoom
-=======
-	create_board()
->>>>>>> Stashed changes
 	yield(get_tree().create_timer(0.001), "timeout") # JANKY, REQUIRED FOR TILES TO UPDATE POSITION
 	start_game()
+
+
+func show_move_lights():
+	for player in players:
+		if !player_moving:
+			players.get(player).show_move_lights()
+			yield(get_tree().create_timer(1.5), "timeout")
+		else:
+			break
+		
+	show_move_lights()
 
 
 func start_game():
@@ -55,6 +63,7 @@ func start_game():
 		tiles[tile.coords] = tile
 	
 	spawn_players()
+	show_move_lights()
 
 
 func create_board():
@@ -121,14 +130,14 @@ func _on_recieved_player_actions(player, moves, shots):
 		child.queue_free()
 	
 	for move in moves:
-		tiles.get(move).show_light()
+#		tiles.get(move).show_light()
 		var button = Button.new()
 		button.rect_scale *= 2
 		button.text = "/move %s" % move
 		button.connect("pressed", self, "_on_actionButton_pressed", [button])
 		optionsContainer.add_child(button)
 	for shot in shots:
-		tiles.get(shot).show_light(true, "RED")
+#		tiles.get(shot).show_light(true, "RED")
 		var button = Button.new()
 		button.rect_scale *= 2
 		button.text = "/shoot %s" % shot
@@ -138,22 +147,9 @@ func _on_recieved_player_actions(player, moves, shots):
 
 func _on_actionButton_pressed(button):
 	var action = button.text.split(" ")
-	
-	#turn off light animations
-	for move in current_moves:
-		tiles.get(move).show_light(false)
-	for shot in current_shots:
-		tiles.get(shot).show_light(false)
-	
+	var new_tile = tiles.get(action[1])
 	match action[0]:
 		"/move":
-			var new_tile = tiles.get(action[1])
-			var old_tile = tiles.get(current_player.current_tile)
-			
-			current_player.move(new_tile.position)
-			current_player.current_tile = action[1]
-			new_tile.occupied = current_player
-			old_tile.occupied = false
-			
+			current_player.move(new_tile)
 		"/shoot":
-			current_player.shoot(tiles.get(action[1]).position)
+			current_player.shoot(new_tile)
