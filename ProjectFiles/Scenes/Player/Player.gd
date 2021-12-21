@@ -42,7 +42,7 @@ func reparent_line_trails():
 		trail.reparent(get_parent())
 
 
-func get_actions():
+func get_actions(emit=true):
 	current_moves.clear()
 	current_shots.clear()
 	
@@ -54,11 +54,12 @@ func get_actions():
 			current_shots[tile.coords] = tile
 		elif tile.occupied and tile.occupied == self:
 			current_tile = tile
-	
-	emit_signal("actions", self, current_moves, current_shots)
+	if emit:
+		emit_signal("actions", self, current_moves, current_shots)
 
 
 func show_move_lights():
+	get_actions(false)
 	for move in current_moves:
 		current_moves.get(move).show_light()
 	for shot in current_shots:

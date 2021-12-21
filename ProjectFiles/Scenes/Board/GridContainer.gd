@@ -38,9 +38,6 @@ func _ready():
 	randomize()
 	
 	create_board()
-	camera.global_position = rect_size / 2
-	camera.relative_zoom = tile_container.rect_size / (TILE_SIZE * 6)
-	camera.zoom = camera.relative_zoom
 	yield(get_tree().create_timer(0.001), "timeout") # JANKY, REQUIRED FOR TILES TO UPDATE POSITION
 	start_game()
 
@@ -123,6 +120,10 @@ func create_board():
 	camera.global_position = rect_size / 2
 	camera.relative_zoom = tile_container.rect_size / (TILE_SIZE * 6)
 	camera.zoom = camera.relative_zoom
+	
+	$LightControl/Light2D.texture_scale = tile_container.rect_size.x / 1080.0
+	
+	print($LightControl/Light2D.texture_scale)
 
 
 func spawn_players():
