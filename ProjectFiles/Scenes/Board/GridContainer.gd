@@ -4,21 +4,25 @@ extends Control
 const TILE_SIZE = Vector2(150, 150)
 const ALPHABET = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
-export var grid_size = 7
+var grid_size = 7
 
 var tile_TSCN = preload("res://Scenes/Board/Tiles/Tile.tscn")
 
 onready var camera = $Camera2D
 onready var optionsContainer = $OptionsContainer
-onready var tile_container = $GridContainer
-onready var H_Labels = $HBoxContainer
-onready var V_Labels = $VBoxContainer
+onready var tile_container = $TileContainer
+onready var H_Labels = $HLabels
+onready var V_Labels = $VLabels
 
 var font = preload("res://Fonts/Font.tres")
 var player_TSCN = preload("res://Scenes/Player_1/Player.tscn")
 var players := {
 	"ACB_Gamez" : null,
-	"Subscriber" : null
+	"Subscriber1" : null,
+	"Subscriber2" : null,
+	"Subscriber3" : null,
+	"Subscriber4" : null,
+	"Subscriber5" : null,
 }
 var current_player
 var tiles := {}
@@ -30,25 +34,31 @@ signal tiles_set
 
 func _ready():
 	randomize()
+<<<<<<< Updated upstream
 	
 	spawn_tiles()
 	camera.global_position = rect_size / 2
 	camera.relative_zoom = tile_container.rect_size / (TILE_SIZE * 6)
 	camera.zoom = camera.relative_zoom
+=======
+	create_board()
+>>>>>>> Stashed changes
 	yield(get_tree().create_timer(0.001), "timeout") # JANKY, REQUIRED FOR TILES TO UPDATE POSITION
 	start_game()
 
 
 func start_game():
+#	create_board()
 	emit_signal("tiles_set")
 	
-	for child in tile_container.get_children(): # CREATES DICTIONARY OF TILES AND NODES
-		tiles[child.coords] = child
+	for tile in tile_container.get_children(): # CREATES DICTIONARY OF TILES AND NODES
+		tiles[tile.coords] = tile
 	
 	spawn_players()
 
 
-func spawn_tiles():
+func create_board():
+	grid_size = int(players.size() * 1.5)
 	tile_container.columns = grid_size
 	for child in tile_container.get_children():
 		child.free()
@@ -79,6 +89,10 @@ func spawn_tiles():
 	
 	H_Labels.rect_size.x = tile_container.rect_size.x
 	H_Labels.rect_position = tile_container.rect_position + Vector2(TILE_SIZE.x/2 - 25 * .3, H_Labels.rect_size.y + tile_container.rect_size.y)
+	
+	camera.global_position = rect_size / 2
+	camera.relative_zoom = tile_container.rect_size / (TILE_SIZE * 6)
+	camera.zoom = camera.relative_zoom
 
 
 func spawn_players():

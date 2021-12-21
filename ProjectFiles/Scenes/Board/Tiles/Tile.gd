@@ -36,11 +36,9 @@ func _on_tiles_set():
 func show_light(show=true, color="BLUE"):
 	if show:
 		light.color = COLORS.get(color)
-		set_physics_process(true)
 		animationPlayer.play("light")
 	else:
 		animationPlayer.stop()
 		tween.interpolate_property(light, "energy", light.energy, 0, 
 		1.2, Tween.TRANS_SINE, Tween.EASE_OUT)
 		tween.start()
-		set_physics_process(false)

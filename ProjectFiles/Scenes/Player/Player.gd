@@ -14,6 +14,8 @@ onready var trailsNode = $LineTrails
 #onready var portalAnimatedSprite = $PortalAnimatedSprite
 
 var bullet_TSCN = preload("res://Scenes/Bullet/Bullet.tscn")
+var current_moves := {}
+var current_shots := {}
 var current_tile : String
 var player_name : String
 var action_points := 0
@@ -29,32 +31,42 @@ signal actions(player, moves, shots)
 
 func _ready():
 	reparent_line_trails()
-#	if Globals._2DWorld:
-#		portal()
 	Globals.player = self
-	yield(get_tree().create_timer(.1), "timeout")
+	yield(get_tree().create_timer(.01), "timeout")
 	for trail in lineTrails:
 		trail.set_thrust(thrust)
+	
 	get_actions()
 
 
+<<<<<<< Updated upstream
+=======
+func _physics_process(_delta):
+	animations()
+
+
+>>>>>>> Stashed changes
 func reparent_line_trails():
 	for trail in lineTrails:
 		trail.reparent(get_parent())
 
 func get_actions():
-	var moves = {}
-	var shots = {}
 	for tile in movement_rangeArea.get_overlapping_areas():
 		tile = tile.tile
 		if !tile.occupied and global_position.distance_to(tile.position) < 213:
-			moves[tile.coords] = tile.position
+			current_moves[tile.coords] = tile
 		elif tile.occupied and tile.occupied != self:
-			shots[tile.coords] = tile.occupied
+			current_shots[tile.coords] = tile
 		elif tile.occupied and tile.occupied == self:
-			current_tile = tile.coords
+			current_tile = tile
 	
-	emit_signal("actions", self, moves, shots)
+	
+	emit_signal("actions", self, current_moves, current_shots)
+
+
+func show_move_lights():
+	pass
+
 
 # MOVEMENT FUNCTIONS ———————————————————————————————————————————————————————————
 func animations():
@@ -74,7 +86,6 @@ func move(pos):
 	movement_rangeArea.rotation = rotation # ENSURES IS AT 90º ANGLE RELATIVE TO BOARD
 	thrust = 1
 	moving = false
-	get_actions()
 
 
 func _on_Tween_tween_step(_object, key, _elapsed, value):

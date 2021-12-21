@@ -13,7 +13,6 @@ extents = Vector2( 225, 225 )
 [sub_resource type="Animation" id=2]
 resource_name = "light"
 length = 1.3
-loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite/Light2D:energy")
 tracks/0/interp = 2
@@ -57,7 +56,7 @@ position = Vector2( 250, 250 )
 texture = ExtResource( 6 )
 texture_scale = 0.5
 color = Color( 0, 0.72, 1, 1 )
-energy = 0.483534
+energy = 0.0
 
 [node name="Label" type="Label" parent="."]
 modulate = Color( 1, 1, 1, 0.5 )
