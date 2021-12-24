@@ -18,7 +18,7 @@ var current_moves := {}
 var current_shots := {}
 var current_tile 
 var player_name : String
-var action_points := 0
+var action_points := 1
 var dead := false
 var moving := false
 var health = 3
@@ -26,6 +26,7 @@ var thrust := 0.0
 var past_val = Vector2.ZERO
 
 signal actions(player, moves, shots)
+
 
 func _ready():
 	reparent_line_trails()
@@ -68,28 +69,30 @@ func show_move_lights():
 
 
 func move(tile):
-	current_tile.occupied = false
-	tile.occupied = self
-	current_tile = tile
-	
-	moving = true
-	var pos = tile.position
-	var aim_rot = global_position.direction_to(pos).angle() + deg2rad(90)
-	aim_rot = short_angle_dist(rotation, aim_rot) + rotation
-	
-	tween.interpolate_property(self, "rotation", rotation, aim_rot, 
-	MOVE_TIME * 0.9, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
-	
-	tween.interpolate_property(self, "global_position", global_position, pos, 
-	MOVE_TIME, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
-	tween.start()
-	
-	yield(tween, "tween_all_completed")
-	movement_rangeArea.rotation = rotation # ENSURES IS AT 90º ANGLE RELATIVE TO BOARD
-	thrust = 1
-	moving = false
-	
-	get_actions()
+	if action_points > 0:
+		action_points -= 1
+		current_tile.occupied = false
+		tile.occupied = self
+		current_tile = tile
+		
+		moving = true
+		var pos = tile.position
+		var aim_rot = global_position.direction_to(pos).angle() + deg2rad(90)
+		aim_rot = short_angle_dist(rotation, aim_rot) + rotation
+		
+		tween.interpolate_property(self, "rotation", rotation, aim_rot, 
+		MOVE_TIME * 0.9, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+		
+		tween.interpolate_property(self, "global_position", global_position, pos, 
+		MOVE_TIME, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+		tween.start()
+		
+		yield(tween, "tween_all_completed")
+		movement_rangeArea.rotation = rotation # ENSURES IS AT 90º ANGLE RELATIVE TO BOARD
+		thrust = 1
+		moving = false
+		
+		get_actions()
 
 
 func _on_Tween_tween_step(_object, key, _elapsed, value):
@@ -106,23 +109,25 @@ func _on_Tween_tween_step(_object, key, _elapsed, value):
 
 # SHOOT FUNCTIONS ——————————————————————————————————————————————————————————————
 func shoot(tile):
-	var aim_rot = global_position.direction_to(tile.position).angle() + deg2rad(90)
-	var rot_time = clamp(abs(rad2deg(short_angle_dist(rotation, aim_rot))/100.0), 0.0, 2.0)
-	
-	aim_rot = short_angle_dist(rotation, aim_rot) + rotation
-	
-	tween.interpolate_property(self, "rotation", rotation, aim_rot, 
-	rot_time, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
-	tween.start()
-	
-	yield(tween, "tween_all_completed")
-	yield(get_tree().create_timer(0.15), "timeout")
-	
-	var bullet_ins = bullet_TSCN.instance()
-	bullet_ins.target = tile.position
-	bullet_ins.global_position = barrelPos.global_position
-	get_parent().add_child(bullet_ins)
-#	get_parent().call_deferred("add_child", bullet_ins)
+	if action_points > 0:
+		action_points -= 1
+		
+		var aim_rot = global_position.direction_to(tile.position).angle() + deg2rad(90)
+		var rot_time = clamp(abs(rad2deg(short_angle_dist(rotation, aim_rot))/100.0), 0.0, 2.0)
+		
+		aim_rot = short_angle_dist(rotation, aim_rot) + rotation
+		
+		tween.interpolate_property(self, "rotation", rotation, aim_rot, 
+		rot_time, Tween.TRANS_SINE, Tween.EASE_IN_OUT)
+		tween.start()
+		
+		yield(tween, "tween_all_completed")
+		yield(get_tree().create_timer(0.15), "timeout")
+		
+		var bullet_ins = bullet_TSCN.instance()
+		bullet_ins.target = tile.position
+		bullet_ins.global_position = barrelPos.global_position
+		get_parent().add_child(bullet_ins)
 
 # AIMING FUNCTIONS —————————————————————————————————————————————————————————————
 func _lerp_angle(from, to, weight):
@@ -173,17 +178,21 @@ func short_angle_dist(from, to):
 #
 #	Globals.current_score_time = score_time
 
+func _on_new_round():
+	action_points += 1
+
 
 func take_damage():
-	Globals.camera.shake(1000, 0.3, 1000, 8)
 	health -= 1
 	
 	if health <= 0:
 		die()
 
+
 func die():
 	if !dead:
 		dead = true
+		queue_free()
 #		portal(false)
 #		Transitioner.change_title_page("SCORE")
 #		Music._out()

@@ -4,7 +4,7 @@
 [ext_resource path="res://Scenes/Autoloads/Camera/Camera.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Images/Lights/LightDifuse.png" type="Texture" id=4]
 
-[node name="Control" type="Control"]
+[node name="HBoxContainer" type="HBoxContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 1 )
@@ -12,7 +12,30 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="TileContainer" type="GridContainer" parent="."]
+[node name="TimerLabel" type="Label" parent="."]
+margin_top = 533.0
+margin_right = 637.0
+margin_bottom = 547.0
+size_flags_horizontal = 3
+size_flags_vertical = 6
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Control" type="Control" parent="."]
+margin_left = 641.0
+margin_right = 1278.0
+margin_bottom = 1080.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Timer" type="Timer" parent="Control"]
+
+[node name="TileContainer" type="GridContainer" parent="Control"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -30,7 +53,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HLabels" type="HBoxContainer" parent="."]
+[node name="HLabels" type="HBoxContainer" parent="Control"]
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -40,7 +63,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VLabels" type="VBoxContainer" parent="."]
+[node name="VLabels" type="VBoxContainer" parent="Control"]
 anchor_bottom = 1.0
 rect_min_size = Vector2( 32, 32 )
 custom_constants/separation = 0
@@ -48,23 +71,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Camera2D" parent="." instance=ExtResource( 2 )]
+[node name="Camera2D" parent="Control" instance=ExtResource( 2 )]
 
-[node name="OptionsContainer" type="VBoxContainer" parent="."]
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-margin_left = -201.0
-margin_top = -272.0
-margin_bottom = 272.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="CanvasLayer" type="CanvasLayer" parent="Control"]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+[node name="ColorRect" type="ColorRect" parent="Control/CanvasLayer"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -74,7 +85,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="LightControl" type="Control" parent="."]
+[node name="LightControl" type="Control" parent="Control"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -87,7 +98,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Light2D" type="Light2D" parent="LightControl"]
+[node name="Light2D" type="Light2D" parent="Control/LightControl"]
 texture = ExtResource( 4 )
 color = Color( 0, 0.721569, 1, 1 )
 energy = 0.8
@@ -96,3 +107,15 @@ range_item_cull_mask = 2
 __meta__ = {
 "_editor_description_": ""
 }
+
+[node name="OptionsContainer" type="VBoxContainer" parent="."]
+margin_left = 1282.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="timeout" from="Control/Timer" to="." method="_on_Timer_timeout"]
