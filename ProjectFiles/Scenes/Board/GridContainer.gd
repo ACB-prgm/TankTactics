@@ -120,20 +120,19 @@ func create_board():
 		v_label.text = str(i)
 		v_label.set("custom_fonts/font", font)
 		V_Labels.add_child(v_label)
-		
+	
 	tile_container.set_anchors_and_margins_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 	
-	V_Labels.rect_size.y = tile_container.rect_size.y
-	
-	H_Labels.rect_size.x = tile_container.rect_size.x
-	
+	$Control.rect_min_size = tile_container.rect_size + Vector2(V_Labels.rect_size.x*5, H_Labels.rect_size.y)
 	$Control/LightControl/Light2D.texture_scale = tile_container.rect_size.x / 1080.0
-	$Control.rect_min_size = tile_container.rect_size + Vector2(V_Labels.rect_size.x, H_Labels.rect_size.y)
+	self.rect_size = tile_container.rect_size + Vector2(timerLabel.rect_size.x + optionsContainer.rect_size.x, 0)
 	
+	V_Labels.rect_size.y = tile_container.rect_size.y
+	H_Labels.rect_size.x = tile_container.rect_size.x
 	V_Labels.rect_position = tile_container.rect_position - Vector2(V_Labels.rect_size.x*2, 0) + Vector2(0, TILE_SIZE.x/2 - 25 * .3)
 	H_Labels.rect_position = tile_container.rect_position + Vector2(TILE_SIZE.x/2 - 25 * .3, H_Labels.rect_size.y + tile_container.rect_size.y)
 	
-	camera.global_position = rect_size / 2
+	camera.global_position = rect_global_position + rect_size / 2
 	camera.relative_zoom = tile_container.rect_size / (TILE_SIZE * 6)
 	camera.zoom = camera.relative_zoom
 
@@ -148,12 +147,12 @@ func spawn_players():
 		
 		var player_ins = player_TSCN.instance()
 		players[player] = player_ins
-		player_ins.global_position = spawn_tile.position
 		player_ins.player_name = player
 		connect("new_round", player_ins, "_on_new_round")
 		player_ins.connect("actions", self, "_on_recieved_player_actions")
 		spawn_tile.occupied = player_ins
 		add_child(player_ins)
+		player_ins.global_position = spawn_tile.position
 	
 	emit_signal("players_spawned")
 

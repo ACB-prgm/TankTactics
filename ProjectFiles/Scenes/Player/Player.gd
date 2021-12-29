@@ -125,8 +125,8 @@ func shoot(tile):
 		yield(get_tree().create_timer(0.15), "timeout")
 		
 		var bullet_ins = bullet_TSCN.instance()
+		bullet_ins.start_pos = barrelPos.global_position
 		bullet_ins.target = tile.position
-		bullet_ins.global_position = barrelPos.global_position
 		get_parent().add_child(bullet_ins)
 
 # AIMING FUNCTIONS —————————————————————————————————————————————————————————————
