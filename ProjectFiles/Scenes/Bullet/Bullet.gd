@@ -1,19 +1,21 @@
 extends Node2D
 
 
-const dur := .75
 const TRANS = Tween.TRANS_QUAD
 
 onready var tween = $Tween
 onready var sprite = $Sprite
 
 var impact_TSCN = preload("res://Scenes/Bullet/BulletImpact.tscn")
+var dur : float
+var parent
 var target := Vector2.ZERO
 var start_pos := Vector2.ZERO
 
 
 func _ready():
 	global_position = start_pos
+	dur = start_pos.distance_to(target)/377.0
 	shoot()
 
 
@@ -42,6 +44,7 @@ func shoot():
 
 func _on_Tween_tween_all_completed():
 	var impact = impact_TSCN.instance()
+	impact.connect("bullet_dead", parent, "_on_bullet_dead")
 	get_parent().add_child(impact)
 	impact.global_position = global_position + Vector2(30,10).rotated(rotation)
 	

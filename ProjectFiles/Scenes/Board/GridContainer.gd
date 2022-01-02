@@ -2,7 +2,7 @@ extends HBoxContainer
 
 
 const TILE_SIZE = Vector2(150, 150)
-const ROUND_TIME = 900000 #[0, 15, 0] #15 minutes
+const ROUND_TIME = 600000 #[0, 10, 0] #10 minutes
 const ALPHABET = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
 var grid_size = 7
@@ -10,11 +10,12 @@ var grid_size = 7
 var tile_TSCN = preload("res://Scenes/Board/Tiles/Tile.tscn")
 
 onready var camera = $Control/Camera2D
-onready var optionsContainer = $OptionsContainer
+onready var optionsContainer = $RoundInfoVBoxContainer/OptionsContainer
 onready var tile_container = $Control/TileContainer
 onready var H_Labels = $Control/HLabels
 onready var V_Labels = $Control/VLabels
-onready var timerLabel = $TimerLabel
+onready var timerLabel = $RoundInfoVBoxContainer/TimerLabel
+onready var roundLabel = $RoundInfoVBoxContainer/RoundLabel
 onready var timer = $Control/Timer
 
 var font = preload("res://Fonts/Font.tres")
@@ -28,10 +29,11 @@ var players := {
 	"Subscriber5" : null,
 }
 var tiles := {}
+var _round := 1
 var current_player
 var current_moves : Dictionary
 var current_shots : Dictionary
-var player_moving := false
+var player_acting := false
 var start_time = OS.get_ticks_msec()
 
 signal tiles_set
@@ -41,24 +43,22 @@ signal new_round
 
 func _ready():
 	randomize()
-	
+	_on_Timer_timeout()
 	create_board()
 	yield(get_tree().create_timer(0.001), "timeout") # JANKY, REQUIRED FOR TILES TO UPDATE POSITION
 	start_game()
 
 
 func show_move_lights():
-	var sorted_players = get_sorted_players()
-	
-	for player in sorted_players:
-		if !player_moving:
+	if !player_acting:
+		var sorted_players = get_sorted_players()
+		
+		for player in sorted_players:
 			if is_instance_valid(player):
 				player.get_actions()
 				player.show_move_lights()
 				yield(get_tree().create_timer(Globals.TILE_ANIM_TIME), "timeout")
-		else:
-			break
-		
+	yield(get_tree().create_timer(0.1), "timeout")
 	show_move_lights()
 
 
@@ -71,6 +71,7 @@ func get_sorted_players() -> Array:
 			var dist = rect_global_position.distance_squared_to(player.global_position)
 			_players[dist] = player
 			dists.append(dist)
+	
 	
 	dists.sort()
 	var sorted_players := []
@@ -149,6 +150,8 @@ func spawn_players():
 		players[player] = player_ins
 		player_ins.player_name = player
 		connect("new_round", player_ins, "_on_new_round")
+		player_ins.connect("player_died", self, "_on_player_died")
+		player_ins.connect("player_action", self, "_on_player_action")
 		player_ins.connect("actions", self, "_on_recieved_player_actions")
 		spawn_tile.occupied = player_ins
 		add_child(player_ins)
@@ -157,28 +160,46 @@ func spawn_players():
 	emit_signal("players_spawned")
 
 
+func _on_player_died(player):
+	players.erase(player)
+
+
+func _on_player_action(acting):
+	player_acting = acting
+	
+	if !acting:
+		var new_round = true
+		for player in players:
+			player = players.get(player)
+			if player.action_points != 0:
+				new_round = false
+		if new_round:
+			round_change()
+
+
 func _on_recieved_player_actions(player, moves, shots):
-	current_player = player
-	current_moves = moves
-	current_shots = shots
-	
-	for child in optionsContainer.get_children():
-		child.queue_free()
-	
-	for move in moves:
-#		tiles.get(move).show_light()
-		var button = Button.new()
-		button.rect_scale *= 2
-		button.text = "/move %s" % move
-		button.connect("pressed", self, "_on_actionButton_pressed", [button])
-		optionsContainer.add_child(button)
-	for shot in shots:
-#		tiles.get(shot).show_light(true, "RED")
-		var button = Button.new()
-		button.rect_scale *= 2
-		button.text = "/shoot %s" % shot
-		button.connect("pressed", self, "_on_actionButton_pressed", [button])
-		optionsContainer.add_child(button)
+	if player.action_points > 0:
+		current_player = player
+		current_moves = moves
+		current_shots = shots
+		
+		for child in optionsContainer.get_children():
+			child.queue_free()
+		
+		for move in moves:
+	#		tiles.get(move).show_light()
+			var button = Button.new()
+			button.rect_scale *= 2
+			button.text = "/move %s" % move
+			button.connect("pressed", self, "_on_actionButton_pressed", [button])
+			optionsContainer.add_child(button)
+		for shot in shots:
+	#		tiles.get(shot).show_light(true, "RED")
+			var button = Button.new()
+			button.rect_scale *= 2
+			button.text = "/shoot %s" % shot
+			button.connect("pressed", self, "_on_actionButton_pressed", [button])
+			optionsContainer.add_child(button)
 
 
 func _on_actionButton_pressed(button):
@@ -204,11 +225,14 @@ func get_time_from_msecs(msec):
 func _on_Timer_timeout():
 	var time = ROUND_TIME - (OS.get_ticks_msec() - start_time)
 	if time <= 0:
-		start_time = OS.get_ticks_msec()
 		round_change()
 	time = get_time_from_msecs(time)
 	timerLabel.text = "%s:%s" % [str(time[1]).pad_zeros(2), str(time[2]).pad_zeros(2)]
 
 
 func round_change():
+	_round += 1
+	roundLabel.text = "Round %s" % _round
+	start_time = OS.get_ticks_msec()
 	emit_signal("new_round")
+	

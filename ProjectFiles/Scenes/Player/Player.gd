@@ -20,12 +20,13 @@ var current_tile
 var player_name : String
 var action_points := 1
 var dead := false
-var moving := false
 var health = 3
 var thrust := 0.0
 var past_val = Vector2.ZERO
 
 signal actions(player, moves, shots)
+signal player_died(player)
+signal player_action(is_acting)
 
 
 func _ready():
@@ -70,12 +71,12 @@ func show_move_lights():
 
 func move(tile):
 	if action_points > 0:
+		emit_signal("player_action", true)
 		action_points -= 1
 		current_tile.occupied = false
 		tile.occupied = self
 		current_tile = tile
 		
-		moving = true
 		var pos = tile.position
 		var aim_rot = global_position.direction_to(pos).angle() + deg2rad(90)
 		aim_rot = short_angle_dist(rotation, aim_rot) + rotation
@@ -90,13 +91,12 @@ func move(tile):
 		yield(tween, "tween_all_completed")
 		movement_rangeArea.rotation = rotation # ENSURES IS AT 90º ANGLE RELATIVE TO BOARD
 		thrust = 1
-		moving = false
+		emit_signal("player_action", false)
 		
 		get_actions()
 
 
 func _on_Tween_tween_step(_object, key, _elapsed, value):
-	
 	if key == ":global_position":
 		movement_rangeArea.rotation = rotation
 			
@@ -110,6 +110,7 @@ func _on_Tween_tween_step(_object, key, _elapsed, value):
 # SHOOT FUNCTIONS ——————————————————————————————————————————————————————————————
 func shoot(tile):
 	if action_points > 0:
+		emit_signal("player_action", true)
 		action_points -= 1
 		
 		var aim_rot = global_position.direction_to(tile.position).angle() + deg2rad(90)
@@ -125,9 +126,14 @@ func shoot(tile):
 		yield(get_tree().create_timer(0.15), "timeout")
 		
 		var bullet_ins = bullet_TSCN.instance()
+		bullet_ins.parent = self
 		bullet_ins.start_pos = barrelPos.global_position
 		bullet_ins.target = tile.position
 		get_parent().add_child(bullet_ins)
+
+
+func _on_bullet_dead():
+	emit_signal("player_action", false)
 
 # AIMING FUNCTIONS —————————————————————————————————————————————————————————————
 func _lerp_angle(from, to, weight):
@@ -191,6 +197,8 @@ func take_damage():
 
 func die():
 	if !dead:
+		emit_signal("player_died", player_name)
+		current_tile.occupied = false
 		dead = true
 		queue_free()
 #		portal(false)
