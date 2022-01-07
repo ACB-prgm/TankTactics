@@ -42,7 +42,7 @@ func get_auth_code():
 # warning-ignore:return_value_discarded
 	OS.shell_open(url) # Opens window for user authentication
 
-
+# https://developers.google.com/identity/protocols/oauth2/native-app#exchange-authorization-code
 func get_token(auth_code):
 	 var headers = [
 		"code = %s" % auth_code, 
