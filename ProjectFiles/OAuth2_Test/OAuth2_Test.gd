@@ -10,7 +10,6 @@ const token_req := "https://oauth2.googleapis.com/token"
 
 var redirect_server := TCP_Server.new()
 var redirect_uri := "http://%s:%s" % [BINDING, PORT]
-var redir_err = redirect_server.listen(PORT, BINDING)
 var token
 var refresh_token
 
@@ -19,8 +18,9 @@ var refresh_token
 func _ready():
 	load_tokens()
 	
-	if !is_token_valid(token):
-		get_auth_code()
+	if !yield(is_token_valid(), "completed"):
+		if !yield(refresh_tokens(), "completed"):
+			get_auth_code()
 
 
 func _process(_delta):
@@ -31,9 +31,10 @@ func _process(_delta):
 			set_process(false)
 			var auth_code = request.split("&scope")[0].split("=")[1]
 			get_token_from_auth(auth_code)
-
+			redirect_server.stop()
 
 func get_auth_code():
+	var redir_err = redirect_server.listen(PORT, BINDING)
 	
 	var body_parts = [
 		"client_id=%s" % client_ID,
@@ -41,7 +42,6 @@ func get_auth_code():
 		"response_type=code",
 		"scope=https://www.googleapis.com/auth/youtube.readonly",
 	]
-	
 	var url = auth_server + "?" + PoolStringArray(body_parts).join("&")
 	
 # warning-ignore:return_value_discarded
@@ -67,27 +67,27 @@ func get_token_from_auth(auth_code):
 # warning-ignore:return_value_discarded
 	var http_request = HTTPRequest.new()
 	add_child(http_request)
-	http_request.connect("request_completed", self, "_on_new_token_http_request_completed")
+#	http_request.connect("request_completed", self, "_on_new_token_http_request_completed")
 	
 	var error = http_request.request(token_req, headers, true, HTTPClient.METHOD_POST, body)
-
 	if error != OK:
 		push_error("An error occurred in the HTTP request with ERR Code: %s" % error)
-
-func _on_new_token_http_request_completed(_result, _response_code, _headers, body):
-	var response = parse_json(body.get_string_from_utf8())
 	
-	token = response["access_token"]
-	refresh_token = response["refresh_token"]
+	var response = yield(http_request, "request_completed")
+	var response_body = parse_json(response[3].get_string_from_utf8())
+
+	token = response_body["access_token"]
+	refresh_token = response_body["refresh_token"]
 	
 	save_tokens()
+	
+	OS.alert("tokens saved!")
 
 
-func refresh_token(refresh_token):
+func refresh_tokens():
 	var headers = [
 		"Content-Type: application/x-www-form-urlencoded"
 	]
-	headers = PoolStringArray(headers)
 	
 	var body_parts = [
 		"client_id=%s" % client_ID,
@@ -95,44 +95,45 @@ func refresh_token(refresh_token):
 		"refresh_token=%s" % refresh_token,
 		"grant_type=refresh_token"
 	]
-	
 	var body = PoolStringArray(body_parts).join("&")
 	
 # warning-ignore:return_value_discarded
 	var http_request = HTTPRequest.new()
 	add_child(http_request)
-	http_request.connect("request_completed", self, "_on_token_refresh_request_completed")
 	
 	var error = http_request.request(token_req, headers, true, HTTPClient.METHOD_POST, body)
 
 	if error != OK:
 		push_error("An error occurred in the HTTP request with ERR Code: %s" % error)
+	
+	var response = yield(http_request, "request_completed")
+	
+	var response_body = parse_json(response[3].get_string_from_utf8())
+	
+	if response_body.get("access_token"):
+		token = response_body["access_token"]
+		save_tokens()
+		return true
+	else:
+		return false
 
-func _on_token_refresh_request_completed(_result, response_code, _headers, body):
-	var response = parse_json(body.get_string_from_utf8())
-	token = response["access_token"]
-	save_tokens()
 
-
-func is_token_valid(token) -> bool:
+func is_token_valid() -> bool:
 	var headers = [
 		"Content-Type: application/x-www-form-urlencoded"
 	]
-	headers = PoolStringArray(headers)
 	
 	var body = "access_token=%s" % token
-	
 # warning-ignore:return_value_discarded
 	var http_request = HTTPRequest.new()
 	add_child(http_request)
-	http_request.connect("request_completed", self, "_on_check_token_request_completed")
 	
 	var error = http_request.request(token_req + "info", headers, true, HTTPClient.METHOD_POST, body)
-
 	if error != OK:
 		push_error("An error occurred in the HTTP request with ERR Code: %s" % error)
 	
 	var response = yield(http_request, "request_completed")
+	
 	var expiration = parse_json(response[3].get_string_from_utf8()).get("expires_in")
 	###### CHECK IF THIS WORKS!!!!!!! ##########
 	
@@ -140,11 +141,6 @@ func is_token_valid(token) -> bool:
 		return true
 	else:
 		return false
-
-
-
-func _on_check_token_request_completed(_result, response_code, _headers, body):
-	var response = parse_json(body.get_string_from_utf8())
 
 
 # SAVE/LOAD
