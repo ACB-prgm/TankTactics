@@ -18,9 +18,11 @@ var refresh_token
 func _ready():
 	load_tokens()
 	
-	if !yield(is_token_valid(), "completed"):
-		if !yield(refresh_tokens(), "completed"):
-			get_auth_code()
+	get_auth_code()
+
+#	if !yield(is_token_valid(), "completed"):
+#		if !yield(refresh_tokens(), "completed"):
+#			get_auth_code()
 
 
 func _process(_delta):
@@ -31,6 +33,25 @@ func _process(_delta):
 			set_process(false)
 			var auth_code = request.split("&scope")[0].split("=")[1]
 			get_token_from_auth(auth_code)
+			
+			connection.put_data(("HTTP/1.1 %d\r\n" % 200).to_ascii())
+			var display = """
+			<html>
+			<style>
+			body {text-align: center;
+			 font-family: arial;
+			 font-size: 24px;
+			 font-weight:bold;}
+			</style>
+			<body>
+			<img alt="" width="250" src="https://yt3.ggpht.com/ytc/AKedOLS9brmm0j2XpICsFmZjwUcyiVtjblTZPkSr-Vpw=s176-c-k-c0x00ffffff-no-rj">
+			<br>
+			<h2>Please close this tab and return to the application.</h2>
+			</body>
+			</html>
+			"""
+			
+			connection.put_data(display.to_ascii())
 			redirect_server.stop()
 
 func get_auth_code():
@@ -67,7 +88,6 @@ func get_token_from_auth(auth_code):
 # warning-ignore:return_value_discarded
 	var http_request = HTTPRequest.new()
 	add_child(http_request)
-#	http_request.connect("request_completed", self, "_on_new_token_http_request_completed")
 	
 	var error = http_request.request(token_req, headers, true, HTTPClient.METHOD_POST, body)
 	if error != OK:
@@ -80,8 +100,6 @@ func get_token_from_auth(auth_code):
 	refresh_token = response_body["refresh_token"]
 	
 	save_tokens()
-	
-	OS.alert("tokens saved!")
 
 
 func refresh_tokens():
